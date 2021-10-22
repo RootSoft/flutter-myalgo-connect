@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:algorand_dart/algorand_dart.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_myalgo_connect/myalgo_connect.dart';
 import 'package:flutter_myalgo_connect/myalgo_connect_web.dart';
@@ -42,40 +43,54 @@ class _MyAppState extends State<MyApp> {
             try {
               // Fetch the accounts
               final accounts = await MyAlgoConnect.connect();
+              final address = Address.fromAlgorandAddress(address: accounts[0]);
 
               // Fetch the suggested transaction params
               final params = await algorand.getSuggestedTransactionParams();
 
-              // Construct the transaction
-              final data = <String, dynamic>{
-                'fee': 1000,
-                'flatFee': true,
-                'type': 'pay',
-                'from': accounts[1],
-                'to': accounts[1],
-                'amount': Algo.toMicroAlgos(0.5),
-                'firstRound': params.lastRound,
-                'lastRound': params.lastRound + 1000,
-                'genesisID': params.genesisId,
-                'genesisHash': params.genesisHash,
-              };
+              // Construct the transactions
+              final tx1 = await (PaymentTransactionBuilder()
+                    ..sender = address
+                    ..receiver = address
+                    ..amount = Algo.toMicroAlgos(0.6)
+                    ..suggestedParams = params)
+                  .build();
+
+              final tx2 = await (PaymentTransactionBuilder()
+                    ..sender = address
+                    ..receiver = address
+                    ..amount = Algo.toMicroAlgos(0.5)
+                    ..suggestedParams = params)
+                  .build();
+
+              // Group the transactions
+              AtomicTransfer.group([tx1, tx2]);
 
               // Sign the transaction
-              final signedTx = await MyAlgoConnect.signTransaction(data);
-              final blob = signedTx['blob'];
+              final txs = await MyAlgoConnect.signTransactions([
+                tx1.toBase64(),
+                tx2.toBase64(),
+              ]);
+
+              final sTxs = txs.map((tx) => base64Decode(tx['blob'])).toList();
+              print(sTxs);
 
               // Send the transaction
-              final txId = await algorand.sendRawTransaction(
-                base64Decode(blob),
-              );
+              final txId = await algorand.sendRawTransactions(sTxs);
 
               // Wait for confirmation
-              final tx = await algorand.waitForConfirmation(txId);
-              print('Confirmed tx id in round: ${tx.confirmedRound}');
+              final pendingTx = await algorand.waitForConfirmation(txId);
+              print('Confirmed tx id in round: ${pendingTx.confirmedRound}');
             } on MyAlgoException catch (ex) {
               print('unable to connect ${ex.message}');
             } on AlgorandException catch (ex) {
-              print('unable to send transaction ${ex.message}');
+              final cause = ex.cause;
+              var message = '';
+              if (cause is DioError) {
+                message = cause.message;
+                print(cause.response);
+              }
+              print('AlgorandException: unable to send transaction $message');
             } catch (ex) {
               print('unable to send transaction $ex');
             }

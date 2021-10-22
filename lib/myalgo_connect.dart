@@ -36,7 +36,7 @@ class MyAlgoConnect {
   /// If approved, the response is a signed transaction object,
   /// with the binary blob field base64 encoded to prevent transmission issues.
   static Future<Map<String, dynamic>> signTransaction(
-    Map<String, dynamic> transaction,
+    dynamic transaction,
   ) async {
     final result = await MyAlgoPlatform.instance.signTransaction(transaction);
     return result;
@@ -46,7 +46,7 @@ class MyAlgoConnect {
   /// If approved, the response is a signed transaction object,
   /// with the binary blob field base64 encoded to prevent transmission issues.
   static Future<List<Map<String, dynamic>>> signTransactions(
-    List<Map<String, dynamic>> transactions,
+    List transactions,
   ) async {
     final result = await MyAlgoPlatform.instance.signTransactions(
       transactions: transactions,

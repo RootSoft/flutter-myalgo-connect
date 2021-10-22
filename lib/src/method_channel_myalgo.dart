@@ -15,9 +15,7 @@ class MethodChannelMyAlgo extends MyAlgoPlatform {
   }
 
   @override
-  Future<Map<String, dynamic>> signTransaction(
-    Map<String, dynamic> transaction,
-  ) async {
+  Future<Map<String, dynamic>> signTransaction(dynamic transaction) async {
     final result = await _channel.invokeMethod<Map<String, dynamic>>(
       'signTransaction',
     );
@@ -27,7 +25,7 @@ class MethodChannelMyAlgo extends MyAlgoPlatform {
 
   @override
   Future<List<Map<String, dynamic>>> signTransactions({
-    required List<Map<String, dynamic>> transactions,
+    required List transactions,
   }) async {
     final result = await _channel.invokeMethod<List<Map<String, dynamic>>>(
       'signTransactions',

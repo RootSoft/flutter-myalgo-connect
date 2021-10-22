@@ -39,15 +39,13 @@ abstract class MyAlgoPlatform extends PlatformInterface {
   /// Send transaction objects to MyAlgo for approval.
   /// If approved, the response is an array of signed transaction objects,
   /// with the binary blob field base64 encoded to prevent transmission issues.
-  Future<Map<String, dynamic>> signTransaction(
-    Map<String, dynamic> transaction,
-  );
+  Future<Map<String, dynamic>> signTransaction(dynamic transaction);
 
   /// Send transaction objects to MyAlgo for approval.
   /// If approved, the response is an array of signed transaction objects,
   /// with the binary blob field base64 encoded to prevent transmission issues.
   Future<List<Map<String, dynamic>>> signTransactions({
-    required List<Map<String, dynamic>> transactions,
+    required List transactions,
   });
 
   /// Logic Signatures (or LogicSigs) authorize transactions associated with an

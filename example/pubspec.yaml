@@ -12,10 +12,9 @@ dependencies:
   flutter:
     sdk: flutter
 
-  algorand_dart:
-    git:
-      url: git://github.com/rootsoft/algorand-dart.git
-      ref: master
+  algorand_dart: ^0.0.2-beta.8
+
+  dio: ^4.0.0
 
   flutter_myalgo_connect:
     # When depending on this package from a real application you should use:

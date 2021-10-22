@@ -39,18 +39,27 @@ class MyAlgoPlugin extends MyAlgoPlatform {
   }
 
   @override
-  Future<Map<String, dynamic>> signTransaction(
-    Map<String, dynamic> transaction,
-  ) async {
-    final tx = mapToJSObj(transaction);
+  Future<Map<String, dynamic>> signTransaction(dynamic transaction) async {
+    if (transaction is Map<String, dynamic>) {
+      transaction = mapToJSObj(transaction);
+    }
     var c = Completer<Map<String, dynamic>>();
-    promiseToFuture(myAlgo.signTransaction([tx])).then((value) {
-      final txId = getProperty(value, 'txID') ?? '';
-      final blob = getProperty(value, 'blob') ?? [];
-      return c.complete({
-        'txId': txId,
-        'blob': base64Encode(blob),
-      });
+    promiseToFuture(myAlgo.signTransaction([transaction])).then((value) {
+      if (value is! List || value.isEmpty) {
+        return c.completeError('Invalid transaction');
+      }
+
+      final transactions = value.map((tx) {
+        final txId = getProperty(tx, 'txID') ?? '';
+        final blob = getProperty(tx, 'blob') ?? [];
+
+        return <String, dynamic>{
+          'txId': txId,
+          'blob': base64Encode(blob),
+        };
+      }).toList();
+
+      return c.complete(transactions[0]);
     }).onError((error, stackTrace) => c.completeError(_handleError(error)));
 
     return c.future;
@@ -58,9 +67,15 @@ class MyAlgoPlugin extends MyAlgoPlatform {
 
   @override
   Future<List<Map<String, dynamic>>> signTransactions({
-    required List<Map<String, dynamic>> transactions,
+    required List transactions,
   }) async {
-    final txs = transactions.map(mapToJSObj).toList();
+    final txs = transactions.map((tx) {
+      if (tx is Map<String, dynamic>) {
+        return mapToJSObj(tx);
+      }
+
+      return tx;
+    }).toList();
 
     var c = Completer<List<Map<String, dynamic>>>();
     promiseToFuture(myAlgo.signTransaction(txs)).then((value) {
