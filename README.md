@@ -90,6 +90,8 @@ Since MyAlgo Connect does not support passing base64-encoded transactions or raw
 
 For more information, see the [API Usage](https://github.com/randlabs/myalgo-connect)
 
+Note: Since v1.1.1, this is not longer required and you can use the TransactionBuilders from the algorand-dart sdk.
+
 #### Request
 
 ```dart
@@ -105,6 +107,34 @@ await MyAlgoConnect.signTransaction({
     'genesisID': params.genesisId,
     'genesisHash': params.genesisHash,
 });
+```
+
+or
+
+```dart
+// Construct the transactions
+final tx1 = await (PaymentTransactionBuilder()
+    ..sender = address
+    ..receiver = address
+    ..amount = Algo.toMicroAlgos(0.6)
+    ..suggestedParams = params)
+  .build();
+
+final tx2 = await (PaymentTransactionBuilder()
+    ..sender = address
+    ..receiver = address
+    ..amount = Algo.toMicroAlgos(0.5)
+    ..suggestedParams = params)
+  .build();
+
+// Group the transactions
+AtomicTransfer.group([tx1, tx2]);
+
+// Sign the transaction
+final txs = await MyAlgoConnect.signTransactions([
+    tx1.toBase64(),
+    tx2.toBase64(),
+]);
 ```
 
 #### Example
