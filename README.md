@@ -56,6 +56,18 @@ dependencies:
 
 Alternatively, your editor might support flutter pub get. Check the docs for your editor to learn more.
 
+Next, add the MyAlgo Connect JS file to the bottom of your index.html file:
+
+```html
+  <script src="https://github.com/randlabs/myalgo-connect/releases/download/v1.0.1/myalgo.min.js"></script>
+</body>
+</html>
+```
+
+See [releases](https://github.com/randlabs/myalgo-connect/releases/) for the latest version.
+
+Use ```flutter run -d web-server``` to serve your webapp at localhost.
+
 ## Methods
 The **flutter-myalgo-connect** web plugin wraps the JavaScript API and exposes methods for Flutter developers. This way, Flutter web developers can benefit and create web3 dApplications using the same API.
 
